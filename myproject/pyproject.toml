@@ -1,0 +1,16 @@
+[project]
+name = "project-5"
+version = "0.1.0"
+description = "Курсовой проект 5. Трекер привычек"
+authors = [
+    {name = "Svetlana Kalashnikova",email = "serebsveta@rambler.ru"}
+]
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
