@@ -1,4 +1,5 @@
 import os
+import sys
 from datetime import timedelta
 from pathlib import Path
 from celery.schedules import crontab
@@ -22,19 +23,17 @@ INSTALLED_APPS = [
     "django.contrib.admin",  # администрирование данных в Django-приложениях
     "django.contrib.auth",  # система аутентификации и авторизации пользователей
     "django.contrib.contenttypes",  # инфраструктура для работы с типами моделей, зарегистрированными в проекте
-    "django.contrib.sessions", # часть фреймворка, для обеспечения поддержки сессий для веб-приложений
+    "django.contrib.sessions",  # часть фреймворка, для обеспечения поддержки сессий для веб-приложений
     "django.contrib.messages",  # встроенный фреймворк сообщений, для отображения сообщения пользователям
     "django.contrib.staticfiles",  # встроенное приложение, для управления и обслуживания статических файлов
     "django_extensions",  # дополнительные команды и утилиты для фреймворка Django
     "django_celery_beat",  # расширение, позволяющее хранить расписание периодических задач в бд
-
     "rest_framework",  # подключаем DRF
     "corsheaders",  # механизм безопасности, используемый браузерами для контроля доступа к ресурсам
     "djoser",  # готовые представления для обработки основных операций аутентификации и авторизации
-
     # установленные приложения:
     "users",  # приложение для взаимодействия с пользователем
-    "habit_tracker", # приложение трекер привычек
+    "habit_tracker",  # приложение трекер привычек
 ]
 
 MIDDLEWARE = [
@@ -46,7 +45,6 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-
 ]
 
 CORS_ALLOWED_ORIGINS = [
@@ -74,8 +72,13 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": os.getenv("DATABASE_NAME"),
+        "USER": os.getenv("DATABASE_USER"),
+        "PASSWORD": os.getenv("DATABASE_PASSWORD"),
+        "HOST": os.getenv("DATABASE_HOST"),
+        "PORT": os.getenv("DATABASE_PORT", default="5432"),
+        "CONN_MAX_AGE": 0,
     }
 }
 
@@ -144,8 +147,8 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.IsAuthenticated",  # по умолчанию все защищены
     ),
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
-        'PAGE_SIZE': 5,
+    "DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+    "PAGE_SIZE": 5,
 }
 
 # Настройки срока действия токенов
@@ -159,25 +162,25 @@ STRIPE_SECRET_KEY = os.getenv("STRIPE_SECRET_KEY")
 # Конфигурация для Swagger (инструмента для документирования и тестирования
 # REST API), которая определяет способы аутентификации, используемые в нашем API.
 SWAGGER_SETTINGS = {
-   'SECURITY_DEFINITIONS': {  # словарь, где описываются методы безопасности (аутентификации)
-      'Basic': {  # базовая аутентификация HTTP (клиент отправляет логин и пароль в заголовке запроса)
-            'type': 'basic'
-      },
-      'Bearer': {  # аутентификация по токену (у нас JWT), где токен передается в заголовке Authorization
-            'type': 'apiKey',  # аутентификация происходит через API-ключ.
-            'name': 'Authorization',  # имя HTTP-заголовка, в котором передается токен
-            'in': 'header'  # указывает, что ключ (токен) передается в заголовке запроса
-      }
-   }
+    "SECURITY_DEFINITIONS": {  # словарь, где описываются методы безопасности (аутентификации)
+        "Basic": {  # базовая аутентификация HTTP (клиент отправляет логин и пароль в заголовке запроса)
+            "type": "basic"
+        },
+        "Bearer": {  # аутентификация по токену (у нас JWT), где токен передается в заголовке Authorization
+            "type": "apiKey",  # аутентификация происходит через API-ключ.
+            "name": "Authorization",  # имя HTTP-заголовка, в котором передается токен
+            "in": "header",  # указывает, что ключ (токен) передается в заголовке запроса
+        },
+    }
 }
 
 # Настройки для Celery
 
 # URL-адрес брокера сообщений (Redis по умолчанию работает на порту 6379)
-CELERY_BROKER_URL = os.getenv('REDIS_URL')
+CELERY_BROKER_URL = os.getenv("REDIS_URL", "redis://redis:6379/0")
 
 # URL-адрес брокера результатов, также Redis
-CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://redis:6379/0")
 
 # Часовой пояс для работы Celery
 CELERY_TIMEZONE = "UTC"
@@ -189,14 +192,22 @@ CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 
 CELERY_BEAT_SCHEDULE = {
-    'deactivate_inactive_users_every_day': {
-    'task': 'users.tasks.deactivate_inactive_users',
-    'schedule': crontab(hour=0, minute=0),  # каждый день в 00:00
+    "deactivate_inactive_users_every_day": {
+        "task": "users.tasks.deactivate_inactive_users",
+        "schedule": crontab(hour=0, minute=0),  # каждый день в 00:00
     },
 }
 
-CELERY_ACCEPT_CONTENT = ['json']
-CELERY_TASK_SERIALIZER = 'json'
+CELERY_ACCEPT_CONTENT = ["json"]
+CELERY_TASK_SERIALIZER = "json"
 
-TELEGRAM_BOT_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
-TELEGRAM_CHAT_ID = int(os.getenv('TELEGRAM_CHAT_ID'))
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+TELEGRAM_CHAT_ID = int(os.getenv("TELEGRAM_CHAT_ID"))
+
+if "test" in sys.argv:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "test_db.sqlite3",
+        }
+    }
