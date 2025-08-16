@@ -53,9 +53,11 @@ jobs:
     - name: Run migrations
       env:
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
-        DATABASE_NAME: postgres
-        DATABASE_USER: postgres
-        DATABASE_PASSWORD: 2496543a
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+        DATABASE_USER: ${{ secrets.DATABASE_USER }}
+        DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
         DATABASE_HOST: localhost
         DATABASE_PORT: 5432
       run: python manage.py migrate
@@ -63,9 +65,11 @@ jobs:
     - name: Run tests
       env:
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
-        DATABASE_NAME: postgres
-        DATABASE_USER: postgres
-        DATABASE_PASSWORD: 2496543a
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        DATABASE_NAME: ${{ secrets.DATABASE_NAME }}
+        DATABASE_USER: ${{ secrets.DATABASE_USER }}
+        DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
         DATABASE_HOST: postgres
         DATABASE_PORT: 5432
       run: python manage.py test habit_tracker.tests
