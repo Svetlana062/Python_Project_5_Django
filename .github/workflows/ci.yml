@@ -46,6 +46,8 @@ jobs:
     - name: Create .env file
       run: |
         echo SECRET_KEY=${{ secrets.SECRET_KEY }} > .env
+        echo TELEGRAM_CHAT_ID=${{ secrets.TELEGRAM_CHAT_ID }} >> .env
+        echo TELEGRAM_BOT_TOKEN=${{ secrets.TELEGRAM_BOT_TOKEN }} >> .env
 
     - name: Wait for PostgreSQL to be ready
       run: sleep 10
